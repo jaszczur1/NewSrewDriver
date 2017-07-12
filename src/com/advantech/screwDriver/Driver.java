@@ -13,12 +13,15 @@ public class Driver {
 
     int gear;
     double value;
+    String name;
 
     public Driver(int gear, double value) {
         this.gear = gear;
         this.value = value;
     }
-    
+    void setName(String name) {
+    	this.name = name;
+    };
     
     
 }

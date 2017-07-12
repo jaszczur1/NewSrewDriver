@@ -5,6 +5,7 @@
  */
 package com.advantech.screwDriver;
 
+import java.awt.Frame;
 /**
  *
  * @author jaszczur
@@ -17,33 +18,40 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DB {
+import javax.swing.JFrame;
 
-    Okno okno;
+
+public class DB_toWindow implements dbConnect{
+
+    Okno okno = null;
     Connection con = null;
-
-    public DB(Okno okno) {
-        this.okno = okno;
-    }
-
-    boolean connect() throws SQLException {
-        try {
+    
+//    public DB_toWindow (PatternTable patternTable) {
+//		this.patternTable = patternTable;
+//	}
+    
+    public boolean connect(JFrame frame) throws SQLException {
+    	okno = (Okno) frame;
+    	
+    	try {
             Class.forName("com.mysql.jdbc.Driver");
             con = DriverManager.getConnection(
                     "jdbc:mysql://localhost:3306/screwdriver", "root", "");
         } catch (Exception e) {
-            okno.main_area.append("bład polaczenia z baza \n");
-            System.out.println("bład polaczenia z baza \n" + e);
+            okno.main_area.append("Blad polaczenia z baza! \n");
+//            System.out.println("blad polaczenia z baza \n" + e);
+            okno.main_area.append("Mozliwy test kazdego biegu do pliku \nUstaw Rs");
+            return false;
         }
-        // handle for bad connect
+        // handle for not bad connected
         if (con.getWarnings() == null) {
-            okno.main_area.append("Połacznie z baza ustanowione! \nUstaw Rs\n");
+            okno.main_area.append("Polacznie z baza ustanowione! \nUstaw Rs\n");
         return  true;
         }
         return  false;
     }
 
-    void disconnect() throws SQLException {
+    public void disconnect() throws SQLException {
         con.close();
     }
 
@@ -82,7 +90,7 @@ public class DB {
         }
     }
 
-    List<Driver> get_patern(String name) throws SQLException {
+    public List<Driver> get_patern(String name) throws SQLException {
         List<Driver> l = new ArrayList<Driver>();
 
         Statement get_patern_val = con.createStatement();

@@ -14,32 +14,33 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
 
-public class Okno extends Frame {
+public class Okno extends JFrame {
 
 	/**
 	 * 
 	 */
+	
 	private static final long serialVersionUID = 1L;
 
 	// main handle
 	Okno okno = this;
-
 	HandleFile file;
 	// connect for data
-	DB db = new DB(this);
+	DB_toWindow db = new DB_toWindow();
 	
-	TextArea main_area = new TextArea();
+	JTextArea main_area = new JTextArea("");
+//	JScrollPane scroll = new JScrollPane (main_area, 
+//			   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+	
 	JTextArea Input_barcode = new JTextArea();
-
 	JTextArea[] areas = new JTextArea[10];
 	JFrame o;
 	Rxtx r = new Rxtx();
-
 	Thread thread;
 	Okno.innerClass watek = null;
-
 	// haandle whether calibrate or test exist in function calibrate, test, runnable
 	int function;
+	boolean checkConnectDB = true;
 
 	double[] result_array_calib = new double[10];
 	double[] result_array_test = new double[5];
@@ -48,8 +49,6 @@ public class Okno extends Frame {
 	@SuppressWarnings("deprecation")
 	void calibrate() throws IOException, InterruptedException, SQLException {
 
-		System.err.println("calibrate");
-
 		if (areas[0] == null) {
 			int position = 40;
 			for (int i = 0; i < 10; i++) {
@@ -57,7 +56,7 @@ public class Okno extends Frame {
 				JTextArea jTextAreaTest = new JTextArea(i + 1 + " : ");
 				areas[i] = jTextAreaTest;
 
-				jTextAreaTest.setBounds(210, position, 150, 20);
+				jTextAreaTest.setBounds(245, position, 150, 20);
 				o.add(jTextAreaTest);
 				jTextAreaTest.setCaretPosition(0);
 				o.repaint();
@@ -76,7 +75,7 @@ public class Okno extends Frame {
 				areas[i] = jTextAreaTest;
 
 				// System.err.println(areas[i]);
-				jTextAreaTest.setBounds(210, position, 150, 20);
+				jTextAreaTest.setBounds(245, position, 150, 20);
 				o.add(jTextAreaTest);
 				jTextAreaTest.setCaretPosition(0);
 				o.repaint();
@@ -91,7 +90,7 @@ public class Okno extends Frame {
 			thread = new Thread(watek);
 			thread.start();
 		} else {
-			System.out.println("wznów watek");
+			System.out.println("wznow watek");
 			thread.resume();
 		}
 
@@ -112,20 +111,46 @@ public class Okno extends Frame {
 	@SuppressWarnings("deprecation")
 	void test() throws SQLException, IOException, InterruptedException {
 
-		if (listForGUI.isEmpty()) {
+		if (watek == null) {
+			watek = okno.new innerClass(r.get_inputStream());
+			thread = new Thread(watek);
+			thread.start();
+		} else {
+			System.out.println("wznow watek");
+			thread.resume();
+		}
+
+		if (!checkConnectDB) {
+			file.crateFile(Input_barcode.getText());
+			function = 10;
+			int position = 40;
+			
+			if(areas[0]!= null) {
+				for (int i = 0; i < areas.length; i++) {
+					JTextArea area = areas[i];
+					o.remove(area);
+				}
+			}
+			
+			for (int i = 0; i < 10; i++) {
+
+				JTextArea jTextAreaTest = new JTextArea((i + 1) + " : ");
+				areas[i] = jTextAreaTest;
+
+				System.err.println(areas[i]);
+
+				jTextAreaTest.setBounds(245, position, 150, 20);
+				o.add(jTextAreaTest);
+				jTextAreaTest.setCaretPosition(0);
+				o.repaint();
+				position += 25;
+			}
+
+		} else if (listForGUI.isEmpty()) {
 			okno.main_area.append("Wkretarka nieskalibrowana\nTryb kalibracji\n");
 			calibrate();
 			function = 30;
-		} else {
 
-			if (watek == null) {
-				watek = okno.new innerClass(r.get_inputStream());
-				thread = new Thread(watek);
-				thread.start();
-			} else {
-				System.out.println("wznów watek");
-				thread.resume();
-			}
 		}
 	}
 
@@ -156,14 +181,15 @@ public class Okno extends Frame {
 				} catch (IOException ex) {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				okno.main_area.append("Zeskanuj barcode i testuj lub kalibruj\n");
+				okno.main_area.append("\nZeskanuj barcode i testuj lub kalibruj\n");
 				okno.Input_barcode.requestFocus();
 				okno.Input_barcode.setCaretPosition(0);
+				box.setEnabled(false);
 			}
 		});
 
 		box.setBounds(400, 250, 80, 20);
-		
+
 		Button calibrate = new Button("KALIBRUJ");
 		calibrate.setBounds(400, 5, 60, 30);
 
@@ -190,6 +216,16 @@ public class Okno extends Frame {
 		ActionListener actionListener_test = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+
+				if (checkConnectDB == false) {
+					try {
+						test();
+					} catch (SQLException | IOException | InterruptedException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+					return;
+				}
 
 				// fetch list patern
 				if (listForGUI == null || listForGUI.size() == 0) {
@@ -235,7 +271,7 @@ public class Okno extends Frame {
 
 						System.err.println(areas[i]);
 
-						jTextAreaTest.setBounds(210, position, 150, 20);
+						jTextAreaTest.setBounds(245, position, 150, 20);
 						o.add(jTextAreaTest);
 						jTextAreaTest.setCaretPosition(0);
 						o.repaint();
@@ -250,7 +286,7 @@ public class Okno extends Frame {
 						function = listForGUI.size();
 						JTextArea jTextAreaTest = new JTextArea(listForGUI.get(i).gear + " : ");
 						areas[i] = jTextAreaTest;
-						jTextAreaTest.setBounds(210, position, 150, 20);
+						jTextAreaTest.setBounds(245, position, 150, 20);
 						o.add(jTextAreaTest);
 						jTextAreaTest.setCaretPosition(0);
 						position += 25;
@@ -272,28 +308,44 @@ public class Okno extends Frame {
 		test.addActionListener(actionListener_test);
 		calibrate.addActionListener(actionListener_kalibruj);
 
-		main_area.setSize(100, 400);
-		Input_barcode.setBounds(210, 10, 150, 20);
+		main_area.setSize(240, 400);
+		Input_barcode.setBounds(245, 10, 150, 20);
 
-	//	o.add(calibrate);
-	//	o.add(test);
+		Button table = new Button("table");
+		table.setBounds(499, 399, 39, 100);
+		table.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+			try {
+				PatternTable patternTable =	new PatternTable();
+				
+			} catch (SQLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			}
+		});
+		
+		o.add(calibrate);
+		o.add(test);
 		o.add(main_area);
-	//	o.add(Input_barcode);
-	//	o.add(box);
+		o.add(Input_barcode);
+		o.add(box);
+		o.add(table);
 
-		o.setLayout(new BorderLayout());
+		o.setLayout(null);
 		o.setSize(550, 400);
 		o.setVisible(true);
 		o.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		o.setLocationRelativeTo(null); // centrowanie okna w obszarze pulpitu
-		
 
 		// laczenie z baza i plikiem
 		file = new HandleFile();
-		db.connect();
-		//o.setLayout(null);
+		checkConnectDB = db.connect(this);
+		if (checkConnectDB == false)
+			calibrate.setEnabled(false);
 	}
-
 	public static void main(String[] args) {
 
 		EventQueue.invokeLater(new Runnable() {
@@ -343,11 +395,15 @@ public class Okno extends Frame {
 							// quantity = 0;
 
 							file.set_patern(result_array_calib);
-						} else {
+						} else if (checkConnectDB) {
 							db.test(listForGUI, okno.Input_barcode.getText());
 
 							file.set_test(listForGUI);
 							// main_area.append("zapis wynikow testu do bazy danych\n");
+						} else {
+							System.err.println("zapis do pliku");
+							main_area.append("\nZapis do pliku "+Input_barcode.getText() );
+							file.close_file();
 						}
 						quantity = 0;
 						gear = 0;
@@ -376,7 +432,7 @@ public class Okno extends Frame {
 								quantity++;
 
 							} // for test
-							else {
+							else if (checkConnectDB) {
 								double ex_patern = listForGUI.get(gear).value;
 								System.err.println(ex_patern);
 
@@ -388,7 +444,7 @@ public class Okno extends Frame {
 								if (d < max && d > min) {
 									// o.getContentPane().setBackground(Color.WHITE);
 									listForGUI.get(gear).value = d;
-									areas[gear].setBackground(Color.WHITE);
+									areas[gear].setBackground(Color.GREEN);
 									areas[gear++].append(d + " , ");
 									quantity++;
 								} else {
@@ -396,12 +452,17 @@ public class Okno extends Frame {
 									areas[gear].setBackground(Color.RED);
 									areas[gear].append(d + " , ");
 								}
+							} else {
+								quantity++;
+								areas[gear++].append(d + " , ");
+								file.set_test_unEstabiltyContodb(new Driver(gear, d));
 							}
 						}
-						if (gear == 10) {
+						if (gear == 10 && function == 30) {
 							gear = 0;
 						}
 					}
+					System.out.println(main_area.getSelectedText());
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
