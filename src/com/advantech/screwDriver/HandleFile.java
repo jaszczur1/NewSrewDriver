@@ -37,7 +37,7 @@ public class HandleFile {
         Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
         for (int i = 0; i < patern_file.length; i++) {
-            String d = String.valueOf(patern_file[i] / 3).substring(0, 4);
+            String d = String.valueOf(patern_file[i] / 3);
             fw.append((i + 1) + " " + d + " " + dateFormat.format(date));
             fw.append("\n");
         }

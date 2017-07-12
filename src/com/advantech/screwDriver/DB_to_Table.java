@@ -68,6 +68,7 @@ public class DB_to_Table implements dbConnect {
 		table.defaultModel.addColumn("#8");
 		table.defaultModel.addColumn("#9");
 		table.defaultModel.addColumn("#10");
+		table.defaultModel.addColumn("Data");
 		
 		
 //		for (int count = 1; count <= 10; count++) {
@@ -94,6 +95,7 @@ public class DB_to_Table implements dbConnect {
 			
 			table.table.setValueAt(s.getString("id_driver"), i, 0);
 			table.table.setValueAt(s.getString("barcode"), i, 1);
+			table.table.setValueAt(s.getDate("execution_time_patern"), i, 12);
 			table.table.setValueAt(s.getDouble("result"), i, j);
 			j++;
 			if(j == 12) {

@@ -19,7 +19,7 @@ public class Okno extends JFrame {
 	/**
 	 * 
 	 */
-	
+
 	private static final long serialVersionUID = 1L;
 
 	// main handle
@@ -27,11 +27,12 @@ public class Okno extends JFrame {
 	HandleFile file;
 	// connect for data
 	DB_toWindow db = new DB_toWindow();
-	
+
 	JTextArea main_area = new JTextArea("");
-//	JScrollPane scroll = new JScrollPane (main_area, 
-//			   JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-	
+	// JScrollPane scroll = new JScrollPane (main_area,
+	// JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+	// JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+
 	JTextArea Input_barcode = new JTextArea();
 	JTextArea[] areas = new JTextArea[10];
 	JFrame o;
@@ -45,26 +46,37 @@ public class Okno extends JFrame {
 	double[] result_array_calib = new double[10];
 	double[] result_array_test = new double[5];
 	java.util.List<Driver> listForGUI = null;
+	private JPasswordField password;
 
 	@SuppressWarnings("deprecation")
 	void calibrate() throws IOException, InterruptedException, SQLException {
 
+		// if(!new String(password.getText()).equals("k")) {System.err.println("blad");}
+
+		if (!new String(password.getText()).equals("k") || new String(password.getText()).equals("")) {
+			main_area.append("\nWprowadzono bledne haslo");
+			return;
+		}
+
 		if (areas[0] == null) {
-			int position = 40;
+			int position = 80;
 			for (int i = 0; i < 10; i++) {
 
 				JTextArea jTextAreaTest = new JTextArea(i + 1 + " : ");
 				areas[i] = jTextAreaTest;
 
 				jTextAreaTest.setBounds(245, position, 150, 20);
-				o.add(jTextAreaTest);
+				o.getContentPane().add(jTextAreaTest);
 				jTextAreaTest.setCaretPosition(0);
 				o.repaint();
 				position += 25;
 			}
 		} else {
 
-			int position = 40;
+			
+			
+			
+			int position = 80;
 
 			for (int i = 0; i < areas.length; i++) {
 				JTextArea area = areas[i];
@@ -76,7 +88,7 @@ public class Okno extends JFrame {
 
 				// System.err.println(areas[i]);
 				jTextAreaTest.setBounds(245, position, 150, 20);
-				o.add(jTextAreaTest);
+				o.getContentPane().add(jTextAreaTest);
 				jTextAreaTest.setCaretPosition(0);
 				o.repaint();
 				position += 25;
@@ -99,11 +111,11 @@ public class Okno extends JFrame {
 			function = 30;
 		} else {
 
-			okno.main_area.append("Tryb poprawy kalibracji do pliku\n");
+			okno.main_area.append("kalibracja nowej wkretarki\n");
 			function = 30;
 
 		}
-		// o.getContentPane().remove(areas[0]);
+
 		o.repaint();
 
 	}
@@ -123,15 +135,15 @@ public class Okno extends JFrame {
 		if (!checkConnectDB) {
 			file.crateFile(Input_barcode.getText());
 			function = 10;
-			int position = 40;
-			
-			if(areas[0]!= null) {
+			int position = 80;
+
+			if (areas[0] != null) {
 				for (int i = 0; i < areas.length; i++) {
 					JTextArea area = areas[i];
 					o.remove(area);
 				}
 			}
-			
+
 			for (int i = 0; i < 10; i++) {
 
 				JTextArea jTextAreaTest = new JTextArea((i + 1) + " : ");
@@ -140,14 +152,13 @@ public class Okno extends JFrame {
 				System.err.println(areas[i]);
 
 				jTextAreaTest.setBounds(245, position, 150, 20);
-				o.add(jTextAreaTest);
+				o.getContentPane().add(jTextAreaTest);
 				jTextAreaTest.setCaretPosition(0);
 				o.repaint();
 				position += 25;
 			}
 
 		} else if (listForGUI.isEmpty()) {
-			okno.main_area.append("Wkretarka nieskalibrowana\nTryb kalibracji\n");
 			calibrate();
 			function = 30;
 
@@ -172,6 +183,7 @@ public class Okno extends JFrame {
 
 				try {
 					r.connect(Com);
+					main_area.append("Wybrano :" + Com);
 				} catch (NoSuchPortException ex) {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (PortInUseException ex) {
@@ -188,13 +200,13 @@ public class Okno extends JFrame {
 			}
 		});
 
-		box.setBounds(400, 250, 80, 20);
+		box.setBounds(444, 316, 80, 20);
 
 		Button calibrate = new Button("KALIBRUJ");
-		calibrate.setBounds(400, 5, 60, 30);
+		calibrate.setBounds(464, 9, 60, 30);
 
 		Button test = new Button("TESTUJ");
-		test.setBounds(400, 45, 60, 30);
+		test.setBounds(464, 45, 60, 30);
 
 		ActionListener actionListener_kalibruj = new ActionListener() {
 			@Override
@@ -232,6 +244,8 @@ public class Okno extends JFrame {
 
 					try {
 						listForGUI = okno.db.get_patern(okno.Input_barcode.getText());
+						if(password.getText().equals(""))
+						okno.main_area.append("Wkretarka nieskalibrowana\nSkontaktuj sie z kordynatorem");
 
 					} catch (SQLException ex) {
 						Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
@@ -263,7 +277,7 @@ public class Okno extends JFrame {
 						}
 					}
 
-					int position = 40;
+					int position = 80;
 					for (int i = 0; i < listForGUI.size(); i++) {
 
 						JTextArea jTextAreaTest = new JTextArea(listForGUI.get(i).gear + " : ");
@@ -272,7 +286,7 @@ public class Okno extends JFrame {
 						System.err.println(areas[i]);
 
 						jTextAreaTest.setBounds(245, position, 150, 20);
-						o.add(jTextAreaTest);
+						o.getContentPane().add(jTextAreaTest);
 						jTextAreaTest.setCaretPosition(0);
 						o.repaint();
 						position += 25;
@@ -280,14 +294,14 @@ public class Okno extends JFrame {
 				} else {
 
 					// position for row gui
-					int position = 40;
+					int position = 80;
 					for (int i = 0; i < listForGUI.size(); i++) {
 
 						function = listForGUI.size();
 						JTextArea jTextAreaTest = new JTextArea(listForGUI.get(i).gear + " : ");
 						areas[i] = jTextAreaTest;
 						jTextAreaTest.setBounds(245, position, 150, 20);
-						o.add(jTextAreaTest);
+						o.getContentPane().add(jTextAreaTest);
 						jTextAreaTest.setCaretPosition(0);
 						position += 25;
 					}
@@ -309,32 +323,49 @@ public class Okno extends JFrame {
 		calibrate.addActionListener(actionListener_kalibruj);
 
 		main_area.setSize(240, 400);
-		Input_barcode.setBounds(245, 10, 150, 20);
+		Input_barcode.setBounds(308, 55, 150, 20);
 
 		Button table = new Button("table");
 		table.setBounds(499, 399, 39, 100);
 		table.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-			try {
-				PatternTable patternTable =	new PatternTable();
-				
-			} catch (SQLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
+				try {
+					PatternTable patternTable = new PatternTable();
+
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
-		
-		o.add(calibrate);
-		o.add(test);
-		o.add(main_area);
-		o.add(Input_barcode);
-		o.add(box);
-		o.add(table);
 
-		o.setLayout(null);
+		o.getContentPane().add(calibrate);
+		o.getContentPane().add(test);
+		o.getContentPane().add(main_area);
+		o.getContentPane().add(Input_barcode);
+		o.getContentPane().add(box);
+		o.getContentPane().add(table);
+
+		o.getContentPane().setLayout(null);
+
+		JLabel lblNewLabel = new JLabel("haslo");
+		lblNewLabel.setBounds(252, 22, 46, 14);
+		o.getContentPane().add(lblNewLabel);
+
+		JLabel lblBarcode = new JLabel("barcode");
+		lblBarcode.setBounds(250, 55, 46, 14);
+		o.getContentPane().add(lblBarcode);
+
+		Label label = new Label("Port Rs");
+		label.setBounds(376, 316, 62, 22);
+		o.getContentPane().add(label);
+
+		password = new JPasswordField();
+
+		password.setBounds(308, 19, 150, 20);
+		o.getContentPane().add(password);
 		o.setSize(550, 400);
 		o.setVisible(true);
 		o.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -346,6 +377,7 @@ public class Okno extends JFrame {
 		if (checkConnectDB == false)
 			calibrate.setEnabled(false);
 	}
+
 	public static void main(String[] args) {
 
 		EventQueue.invokeLater(new Runnable() {
@@ -378,6 +410,12 @@ public class Okno extends JFrame {
 
 			int gear = 0;
 			int quantity = 0;
+			int line; // get position text in main area
+
+			if (listForGUI.size() > 0)
+				main_area.append("Testuj bieg :" + String.valueOf(listForGUI.get(0).gear));
+			line = main_area.getLineCount();
+			main_area.setColumns(line);
 
 			byte[] buffer = new byte[1024];
 			int len = -1;
@@ -388,21 +426,16 @@ public class Okno extends JFrame {
 						System.out.println("end test create file");
 						file.crateFile(okno.Input_barcode.getText());
 						if (function == 30) {
-
 							db.set_patern(result_array_calib, okno.Input_barcode.getText());
-
-							// main_area.append("zapis wynikow kalibracji do bazy danych\n");
-							// quantity = 0;
-
 							file.set_patern(result_array_calib);
+							new PatternTable();
 						} else if (checkConnectDB) {
 							db.test(listForGUI, okno.Input_barcode.getText());
-
 							file.set_test(listForGUI);
-							// main_area.append("zapis wynikow testu do bazy danych\n");
+
 						} else {
 							System.err.println("zapis do pliku");
-							main_area.append("\nZapis do pliku "+Input_barcode.getText() );
+							main_area.append("\nZapis do pliku " + Input_barcode.getText());
 							file.close_file();
 						}
 						quantity = 0;
@@ -410,11 +443,11 @@ public class Okno extends JFrame {
 					}
 					if (len > 10) {
 
-						int dot = 0;
+						int dot = 0; // check position dot in String from RS
 
 						value_driver = (new String(buffer, 0, len));
-						int cute = value_driver.indexOf('+');
-						dot = value_driver.indexOf('.');
+						int cute = value_driver.indexOf('+'); // cut String +
+						dot = value_driver.indexOf('.'); // cut String +
 
 						try {
 							value_driver = value_driver.substring(cute + 1);
@@ -425,9 +458,7 @@ public class Okno extends JFrame {
 							double d = Double.parseDouble(value_driver.substring(0, 4));
 
 							if (function == 30) {
-
 								result_array_calib[gear] = result_array_calib[gear] + d;
-
 								areas[gear++].append(d + " , ");
 								quantity++;
 
@@ -445,7 +476,18 @@ public class Okno extends JFrame {
 									// o.getContentPane().setBackground(Color.WHITE);
 									listForGUI.get(gear).value = d;
 									areas[gear].setBackground(Color.GREEN);
+									// System.err.println(line);
+									// main_area.replaceRange("Testuj bieg
+									// :"+String.valueOf(listForGUI.get(gear).gear), line, 150);
 									areas[gear++].append(d + " , ");
+									main_area.append("\n");
+									try {  // handle for exeption gear > list listForGUI.get(gear)
+										
+										main_area.append("Testuj bieg :" + String.valueOf(listForGUI.get(gear).gear));
+									} catch (Exception e) {
+										// TODO: handle exception
+									}
+
 									quantity++;
 								} else {
 									// o.getContentPane().setBackground(Color.red);
@@ -462,7 +504,7 @@ public class Okno extends JFrame {
 							gear = 0;
 						}
 					}
-					System.out.println(main_area.getSelectedText());
+
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
