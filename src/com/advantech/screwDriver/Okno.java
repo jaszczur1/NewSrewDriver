@@ -54,7 +54,7 @@ public class Okno extends JFrame {
 		// input.replaceRange("", 0, end);
 
 	
-           if(len >20)
+           if(len >12)
 			for (int i = 0; i < len; i++) {
 				try {
 
@@ -182,7 +182,7 @@ public class Okno extends JFrame {
 				} catch (IOException ex) {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				okno.main_area.append("\nZeskanuj barcode");
+				okno.main_area.append("\nZeskanuj barcode\n");
 				okno.Input_barcode.requestFocus();
 				okno.Input_barcode.setCaretPosition(0);
 				box.setEnabled(false);
@@ -240,7 +240,7 @@ public class Okno extends JFrame {
 					try {
 						listForGUI = okno.db.get_patern(okno.Input_barcode.getText());
 						if (password.getText().equals(""))
-							okno.main_area.append("Wprowadz haslo do kalibracji\n");
+							okno.main_area.append("Wprowadz haslo do kalibracji");
 					} catch (SQLException ex) {
 						Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 					}
@@ -438,7 +438,7 @@ public class Okno extends JFrame {
 						// init function view tested gear
 						purge_mainArea();
 						if (function == 30 || function == 10)	main_area.append("\nKalibruj bieg :" + 1+"\n");
-						if(function != 30 && function != 10 )   main_area.append("\nTestuj bieg :" + 1 +"\n");
+						if(function != 30 && function != 10 )   main_area.append("\nTestuj bieg :" + listForGUI.get(0).gear +"\n");
 						b = false;
 					}
 
