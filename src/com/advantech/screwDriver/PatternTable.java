@@ -41,7 +41,7 @@ public class PatternTable extends JFrame{
 		// TODO Auto-generated constructor stub
 		setVisible(true);
 		patternTable.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		patternTable.setSize(800, 600);
+		patternTable.setSize(700, 300);
 		
 		to_Table.connect(patternTable);	
 		to_Table.get_patern();

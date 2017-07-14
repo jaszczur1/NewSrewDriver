@@ -60,15 +60,12 @@ public class HandleFile {
     }
     void set_test_unEstabiltyContodb (Driver driver) throws IOException{	
     	
-    	
+    //	System.err.println("zapis w locie");    	
     	Date date = new Date();
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-       
-    	System.out.println(driver.gear+" :"+driver.value);
- 
+    //	System.out.println(driver.gear+" :"+driver.value);
     	fw.append(String.valueOf(driver.gear)+" :" +driver.value+" :"+ dateFormat.format(date));
     	fw.append("\n");
-    	fw.flush();
     }
     void close_file() throws IOException {
     	fw.close();

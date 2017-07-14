@@ -13,12 +13,11 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.*;
+import javax.swing.event.AncestorEvent;
+import javax.swing.event.AncestorListener;
+import javax.swing.text.BadLocationException;
 
 public class Okno extends JFrame {
-
-	/**
-	 * 
-	 */
 
 	private static final long serialVersionUID = 1L;
 
@@ -27,12 +26,11 @@ public class Okno extends JFrame {
 	HandleFile file;
 	// connect for data
 	DB_toWindow db = new DB_toWindow();
-
+	
+	
+	Button calibrate;
+	Button test;
 	JTextArea main_area = new JTextArea("");
-	// JScrollPane scroll = new JScrollPane (main_area,
-	// JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-	// JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-
 	JTextArea Input_barcode = new JTextArea();
 	JTextArea[] areas = new JTextArea[10];
 	JFrame o;
@@ -48,54 +46,67 @@ public class Okno extends JFrame {
 	java.util.List<Driver> listForGUI = null;
 	private JPasswordField password;
 
-	@SuppressWarnings("deprecation")
-	void calibrate() throws IOException, InterruptedException, SQLException {
+	void purge_mainArea() throws BadLocationException {
 
-		// if(!new String(password.getText()).equals("k")) {System.err.println("blad");}
+		int len = main_area.getLineCount();
+		System.err.println(len);
+		// int end = main_area.getLineEndOffset(0);
+		// input.replaceRange("", 0, end);
+
+	
+           if(len >20)
+			for (int i = 0; i < len; i++) {
+				try {
+
+					int end = main_area.getLineEndOffset(i);
+					main_area.replaceRange("", 0, end);
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+				}
+
+		
+		main_area.append("\n");
+	}
+
+	void purge_areas() {
+		for (int i = 0; i < areas.length; i++) {
+			JTextArea area = areas[i];
+			if (area != null) {
+				o.remove(area);
+			}
+		}
+	}
+
+	void create_Areas(int amount) {
+		int position = 80;
+		for (int i = 0; i < amount; i++) {
+
+			JTextArea jTextAreaTest = new JTextArea(i + 1 + " : ");
+			areas[i] = jTextAreaTest;
+
+			jTextAreaTest.setBounds(245, position, 150, 20);
+			o.getContentPane().add(jTextAreaTest);
+			jTextAreaTest.setCaretPosition(0);
+			position += 25;
+		}
+		o.repaint();
+	}
+
+	@SuppressWarnings("deprecation")
+	void calibrate() throws IOException, InterruptedException, SQLException, BadLocationException {
 
 		if (!new String(password.getText()).equals("k") || new String(password.getText()).equals("")) {
 			main_area.append("\nWprowadzono bledne haslo");
 			return;
-		}
-
-		if (areas[0] == null) {
-			int position = 80;
-			for (int i = 0; i < 10; i++) {
-
-				JTextArea jTextAreaTest = new JTextArea(i + 1 + " : ");
-				areas[i] = jTextAreaTest;
-
-				jTextAreaTest.setBounds(245, position, 150, 20);
-				o.getContentPane().add(jTextAreaTest);
-				jTextAreaTest.setCaretPosition(0);
-				o.repaint();
-				position += 25;
-			}
 		} else {
-
-			
-			
-			
-			int position = 80;
-
-			for (int i = 0; i < areas.length; i++) {
-				JTextArea area = areas[i];
-				if (area != null) {
-					o.remove(area);
-				}
-				JTextArea jTextAreaTest = new JTextArea(i + 1 + " : ");
-				areas[i] = jTextAreaTest;
-
-				// System.err.println(areas[i]);
-				jTextAreaTest.setBounds(245, position, 150, 20);
-				o.getContentPane().add(jTextAreaTest);
-				jTextAreaTest.setCaretPosition(0);
-				o.repaint();
-				position += 25;
-				okno.repaint();
-			}
+			purge_mainArea();
 		}
 
+		purge_mainArea();
+		purge_areas();
+		create_Areas(10);
+		
 		if (watek == null) {
 			function = 30;
 			watek = okno.new innerClass(r.get_inputStream());
@@ -107,21 +118,17 @@ public class Okno extends JFrame {
 		}
 
 		if (okno.db.get_patern(okno.Input_barcode.getText()).size() > 0) {
-			okno.main_area.append("Tryb poprawy kalibracji\n");
+			okno.main_area.append("Tryb poprawy kalibracji");
 			function = 30;
 		} else {
-
-			okno.main_area.append("kalibracja nowej wkretarki\n");
+			// okno.main_area.append("kalibracja nowej wkretarki\n");
 			function = 30;
-
 		}
-
 		o.repaint();
-
 	}
 
 	@SuppressWarnings("deprecation")
-	void test() throws SQLException, IOException, InterruptedException {
+	void test() throws SQLException, IOException, InterruptedException, BadLocationException {
 
 		if (watek == null) {
 			watek = okno.new innerClass(r.get_inputStream());
@@ -130,33 +137,15 @@ public class Okno extends JFrame {
 		} else {
 			System.out.println("wznow watek");
 			thread.resume();
+			purge_mainArea();
 		}
 
 		if (!checkConnectDB) {
 			file.crateFile(Input_barcode.getText());
 			function = 10;
-			int position = 80;
 
-			if (areas[0] != null) {
-				for (int i = 0; i < areas.length; i++) {
-					JTextArea area = areas[i];
-					o.remove(area);
-				}
-			}
-
-			for (int i = 0; i < 10; i++) {
-
-				JTextArea jTextAreaTest = new JTextArea((i + 1) + " : ");
-				areas[i] = jTextAreaTest;
-
-				System.err.println(areas[i]);
-
-				jTextAreaTest.setBounds(245, position, 150, 20);
-				o.getContentPane().add(jTextAreaTest);
-				jTextAreaTest.setCaretPosition(0);
-				o.repaint();
-				position += 25;
-			}
+			purge_areas();
+			create_Areas(10);
 
 		} else if (listForGUI.isEmpty()) {
 			calibrate();
@@ -183,7 +172,7 @@ public class Okno extends JFrame {
 
 				try {
 					r.connect(Com);
-					main_area.append("Wybrano :" + Com);
+					main_area.append("\nWybrano :" + Com);
 				} catch (NoSuchPortException ex) {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (PortInUseException ex) {
@@ -193,7 +182,7 @@ public class Okno extends JFrame {
 				} catch (IOException ex) {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				okno.main_area.append("\nZeskanuj barcode i testuj lub kalibruj\n");
+				okno.main_area.append("\nZeskanuj barcode");
 				okno.Input_barcode.requestFocus();
 				okno.Input_barcode.setCaretPosition(0);
 				box.setEnabled(false);
@@ -202,10 +191,10 @@ public class Okno extends JFrame {
 
 		box.setBounds(444, 316, 80, 20);
 
-		Button calibrate = new Button("KALIBRUJ");
+		calibrate = new Button("KALIBRUJ");
 		calibrate.setBounds(464, 9, 60, 30);
 
-		Button test = new Button("TESTUJ");
+		test = new Button("TESTUJ");
 		test.setBounds(464, 45, 60, 30);
 
 		ActionListener actionListener_kalibruj = new ActionListener() {
@@ -220,6 +209,9 @@ public class Okno extends JFrame {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (SQLException ex) {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
 				}
 
 			}
@@ -235,6 +227,9 @@ public class Okno extends JFrame {
 					} catch (SQLException | IOException | InterruptedException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
+					} catch (BadLocationException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
 					}
 					return;
 				}
@@ -244,16 +239,14 @@ public class Okno extends JFrame {
 
 					try {
 						listForGUI = okno.db.get_patern(okno.Input_barcode.getText());
-						if(password.getText().equals(""))
-						okno.main_area.append("Wkretarka nieskalibrowana\nSkontaktuj sie z kordynatorem");
-
+						if (password.getText().equals(""))
+							okno.main_area.append("Wprowadz haslo do kalibracji\n");
 					} catch (SQLException ex) {
 						Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 					}
 					if (listForGUI.size() == 0) {
 						try {
-							// okno.main_area.append("Wkretarka nieskalibrowana\n Uruchomiono tryb
-							// kalibracji");
+							okno.main_area.append("Wkretarka nieskalibrowana\nUruchomiono tryb kalibracji");
 							calibrate();
 						} catch (IOException ex) {
 							Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
@@ -261,6 +254,9 @@ public class Okno extends JFrame {
 							Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 						} catch (SQLException ex) {
 							Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
+						} catch (BadLocationException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
 						}
 						return;
 					}
@@ -268,45 +264,19 @@ public class Okno extends JFrame {
 				}
 
 				function = listForGUI.size();
-				if (areas[0] != null) {
+				purge_areas();
+				int position = 80;
+				for (int i = 0; i < listForGUI.size(); i++) {
 
-					for (int i = 0; i < areas.length; i++) {
-						JTextArea area = areas[i];
-						if (area != null) {
-							o.remove(area);
-						}
-					}
-
-					int position = 80;
-					for (int i = 0; i < listForGUI.size(); i++) {
-
-						JTextArea jTextAreaTest = new JTextArea(listForGUI.get(i).gear + " : ");
-						areas[i] = jTextAreaTest;
-
-						System.err.println(areas[i]);
-
-						jTextAreaTest.setBounds(245, position, 150, 20);
-						o.getContentPane().add(jTextAreaTest);
-						jTextAreaTest.setCaretPosition(0);
-						o.repaint();
-						position += 25;
-					}
-				} else {
-
-					// position for row gui
-					int position = 80;
-					for (int i = 0; i < listForGUI.size(); i++) {
-
-						function = listForGUI.size();
-						JTextArea jTextAreaTest = new JTextArea(listForGUI.get(i).gear + " : ");
-						areas[i] = jTextAreaTest;
-						jTextAreaTest.setBounds(245, position, 150, 20);
-						o.getContentPane().add(jTextAreaTest);
-						jTextAreaTest.setCaretPosition(0);
-						position += 25;
-					}
+					JTextArea jTextAreaTest = new JTextArea(listForGUI.get(i).gear + " : ");
+					areas[i] = jTextAreaTest;
+					jTextAreaTest.setBounds(245, position, 150, 20);
+					o.getContentPane().add(jTextAreaTest);
+					jTextAreaTest.setCaretPosition(0);
 					o.repaint();
+					position += 25;
 				}
+
 				try {
 					test();
 				} catch (SQLException ex) {
@@ -315,18 +285,52 @@ public class Okno extends JFrame {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (InterruptedException ex) {
 					Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
+				} catch (BadLocationException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		};
+		
+		AncestorListener listener = new AncestorListener() {
+			
+			@Override
+			public void ancestorRemoved(AncestorEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void ancestorMoved(AncestorEvent event) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void ancestorAdded(AncestorEvent event) {
+				// TODO Auto-generated method stub
+//				System.err.println(main_area.getLineCount()+"d³ugosc okna");
+				if( main_area.getLineCount() > 15) {
+					
+					try {
+						purge_mainArea();
+					} catch (BadLocationException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		};
 
 		test.addActionListener(actionListener_test);
 		calibrate.addActionListener(actionListener_kalibruj);
+		main_area.addAncestorListener(listener);
 
 		main_area.setSize(240, 400);
 		Input_barcode.setBounds(308, 55, 150, 20);
 
-		Button table = new Button("table");
-		table.setBounds(499, 399, 39, 100);
+		Button table = new Button("TABELA");
+		table.setBounds(464, 81, 60, 20);
 		table.addActionListener(new ActionListener() {
 
 			@Override
@@ -374,8 +378,11 @@ public class Okno extends JFrame {
 		// laczenie z baza i plikiem
 		file = new HandleFile();
 		checkConnectDB = db.connect(this);
-		if (checkConnectDB == false)
+		if (checkConnectDB == false) {
 			calibrate.setEnabled(false);
+			function = 10;
+			password.setEnabled(false);
+		}
 	}
 
 	public static void main(String[] args) {
@@ -400,6 +407,8 @@ public class Okno extends JFrame {
 
 		InputStream in;
 		String value_driver;
+		int bad_val = 0;
+		
 
 		public innerClass(InputStream inputStream) {
 			this.in = inputStream;
@@ -410,39 +419,58 @@ public class Okno extends JFrame {
 
 			int gear = 0;
 			int quantity = 0;
-			int line; // get position text in main area
+			boolean b = true;
 
-			if (listForGUI.size() > 0)
-				main_area.append("Testuj bieg :" + String.valueOf(listForGUI.get(0).gear));
-			line = main_area.getLineCount();
-			main_area.setColumns(line);
+			try {
+				file.crateFile(okno.Input_barcode.getText());
+				System.out.println("create file :" + okno.Input_barcode.getText());
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
 			byte[] buffer = new byte[1024];
 			int len = -1;
 			try {
 				while ((len = this.in.read(buffer)) > -1) {
 
+					if (b) {						
+						// init function view tested gear
+						purge_mainArea();
+						if (function == 30 || function == 10)	main_area.append("\nKalibruj bieg :" + 1+"\n");
+						if(function != 30 && function != 10 )   main_area.append("\nTestuj bieg :" + 1 +"\n");
+						b = false;
+					}
+
 					if (quantity == function) {
-						System.out.println("end test create file");
-						file.crateFile(okno.Input_barcode.getText());
+
 						if (function == 30) {
+
 							db.set_patern(result_array_calib, okno.Input_barcode.getText());
 							file.set_patern(result_array_calib);
 							new PatternTable();
-						} else if (checkConnectDB) {
+
+						}
+
+						else if (checkConnectDB) {
 							db.test(listForGUI, okno.Input_barcode.getText());
 							file.set_test(listForGUI);
 
-						} else {
-							System.err.println("zapis do pliku");
-							main_area.append("\nZapis do pliku " + Input_barcode.getText());
-							file.close_file();
 						}
-						quantity = 0;
-						gear = 0;
-					}
-					if (len > 10) {
 
+						if (!checkConnectDB) {
+							System.err.println("Zapis do pliku");
+							main_area.append("\nZapis do pliku " + Input_barcode.getText());
+						}
+						file.close_file(); // close file
+						quantity = 0; // return functiton to init
+						gear = 0;
+						file.crateFile(Input_barcode.getText());
+						b = true;
+						thread.suspend();
+					}
+
+					if (len > 10) {
 						int dot = 0; // check position dot in String from RS
 
 						value_driver = (new String(buffer, 0, len));
@@ -457,10 +485,33 @@ public class Okno extends JFrame {
 
 							double d = Double.parseDouble(value_driver.substring(0, 4));
 
-							if (function == 30) {
+							if (function == 30 || function == 10) {
 								result_array_calib[gear] = result_array_calib[gear] + d;
+
 								areas[gear++].append(d + " , ");
+								if (!checkConnectDB)
+									file.set_test_unEstabiltyContodb(new Driver(gear, d));
+
 								quantity++;
+								System.err.println(quantity);
+								int pom = gear;
+								
+								if (!(quantity == 10) && function == 10) {
+									main_area.append("Kalibruj bieg :" + (gear+1) + "\n");
+//								} else {
+//									main_area.append("Kalibruj bieg :" + (gear + 1) + "\n else");
+//									gear = pom;
+								}
+								
+								if (!(quantity == 30) && function == 30) {
+									main_area.append("Kalibruj bieg :" + (gear+1) + "\n");
+//								} else {
+//									main_area.append("Kalibruj bieg :" + (gear + 1) + "\n else");
+//									gear = pom;
+								}
+								
+								
+								
 
 							} // for test
 							else if (checkConnectDB) {
@@ -473,6 +524,7 @@ public class Okno extends JFrame {
 								System.out.println(min + " " + max);
 
 								if (d < max && d > min) {
+									bad_val= 0;
 									// o.getContentPane().setBackground(Color.WHITE);
 									listForGUI.get(gear).value = d;
 									areas[gear].setBackground(Color.GREEN);
@@ -480,10 +532,9 @@ public class Okno extends JFrame {
 									// main_area.replaceRange("Testuj bieg
 									// :"+String.valueOf(listForGUI.get(gear).gear), line, 150);
 									areas[gear++].append(d + " , ");
-									main_area.append("\n");
-									try {  // handle for exeption gear > list listForGUI.get(gear)
-										
-										main_area.append("Testuj bieg :" + String.valueOf(listForGUI.get(gear).gear));
+//									main_area.append("\n");
+									try { // handle for exeption gear > list listForGUI.get(gear)
+										main_area.append("Testuj bieg :" + String.valueOf(listForGUI.get(gear).gear)+"\n");
 									} catch (Exception e) {
 										// TODO: handle exception
 									}
@@ -493,24 +544,28 @@ public class Okno extends JFrame {
 									// o.getContentPane().setBackground(Color.red);
 									areas[gear].setBackground(Color.RED);
 									areas[gear].append(d + " , ");
+									if (bad_val == 2) {main_area.append("\nSkontaktuj sie z kordynatorem");
+									calibrate.setEnabled(false);
+									test.setEnabled(false);
+									return; }
+									bad_val++;
 								}
-							} else {
-								quantity++;
-								areas[gear++].append(d + " , ");
-								file.set_test_unEstabiltyContodb(new Driver(gear, d));
 							}
 						}
 						if (gear == 10 && function == 30) {
 							gear = 0;
+							purge_mainArea();
+							b = true;
 						}
 					}
-
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
-
 			} catch (SQLException ex) {
 				Logger.getLogger(Okno.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (BadLocationException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 		}
 	}

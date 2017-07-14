@@ -101,9 +101,16 @@ public class DB_to_Table implements dbConnect {
 			if(j == 12) {
 				j = 2;
 				i++;
+				if(!s.isLast()) {
 				Vector<Object> data1 = new Vector<Object>();
-				table.defaultModel.addRow(data1);
+				
+				try {
+					table.defaultModel.addRow(data1);	
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
 			}
+				}
 			
 //			table.defaultModel.addRow(new Object[] { s.getString("id_driver"), s.getString("barcode"), s.getDouble("result")
 		       		

@@ -45,7 +45,7 @@ public class DB_toWindow implements dbConnect{
         }
         // handle for not bad connected
         if (con.getWarnings() == null) {
-            okno.main_area.append("Polacznie z baza ustanowione! \nUstaw Rs\n");
+            okno.main_area.append("Polacznie z baza ustanowione! \nUstaw Rs");
         return  true;
         }
         return  false;
@@ -63,7 +63,7 @@ public class DB_toWindow implements dbConnect{
         ResultSet rs = test.executeQuery("SELECT patern.id_driver FROM patern WHERE (SELECT driver.id_driver FROM driver WHERE driver.barcode = '" + name + "')");
         //check if given driver exist rs.first() return > 1
         if (rs.first()) {
-            okno.main_area.append("zmiana wartosci\n");
+            okno.main_area.append("zmiana wartosci wzorca kalibracji\n");
             Statement update = con.createStatement();
 
             for (int i = 0; i < ds.length; i++) {
@@ -102,7 +102,7 @@ public class DB_toWindow implements dbConnect{
         tab[3] = 9;
         tab[4] = 11;
 
-        okno.main_area.append("\n");
+//        okno.main_area.append("\n");
         while (s.next()) {
             int gear = s.getInt("gear");
             double result = s.getDouble("result");
